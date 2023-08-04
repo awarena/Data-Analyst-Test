@@ -30,45 +30,45 @@ import numpy as np
 
 # EstimateEventDate('1224')
 
+
+
 # animal is the filename
 # threshold factor decides the sensitivity of the algorithm (the higher, the more sensitive)
-# min event gap decides the minimum day between each events
-def mean_based_anomaly_estimation(animal, threshold_factor=3.0, min_event_gap=20):
+# min outliers decides the minimum outliers a day to constitute an event
+def mean_based_anomaly_estimation(animal, threshold_factor=2.5, min_outlier=10):
     df = pd.read_excel(f"./data/{animal}.xlsx")
     df.columns = ["date", "value"]
     df = df.sort_values(by='date')
     df['date'] = pd.to_datetime(df['date'])
-    df['date'] = df['date'].dt.normalize() # truncate the time part of the object
-    overall_mean_value = df['value'].mean() # overall mean
-    df['is_anomaly'] = df['value'] > (threshold_factor * overall_mean_value) # add another column to indicate if the day is anomaly or not
-    # 
+    df['date'] = df['date'].dt.normalize()  # truncate the time part of the object
+    overall_mean_value = df['value'].mean()  # overall mean
+    df['is_anomaly'] = df['value'] > (threshold_factor * overall_mean_value)  # add another column to indicate if the day is an anomaly or not
 
-    if not (True in df['is_anomaly'].unique()):
+    if not df['is_anomaly'].any():
         print(f"Animal {animal} does not have any event.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")
         return df
+
+    # count the number of outliers for each day
+    df['outlier_count'] = df.groupby('date')['is_anomaly'].transform('sum')
+
+    # apply the constraint of a minimum number of outliers in a day
+    event_days = pd.to_datetime(df[df['outlier_count'] >= min_outlier]['date'].unique())
     
-    # apply the constraint of a minimum gap between events
-    filtered_events = []
-
-    prev_event_date = None
-    for index, row in df.iterrows():
-        if row['is_anomaly']:
-            event_date = row['date']
-            if prev_event_date is None or (event_date - prev_event_date).days > min_event_gap:
-                filtered_events.append(index)
-                prev_event_date = event_date
-                print(f"An event might happen on {event_date.date()} of animal {animal}.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")
-
+    if event_days.size == 0:
+        print(f"No event days found for animal {animal} with a minimum of {min_outlier} outliers per day.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")
+    
+    for day in event_days:
+        print(f"An event might happen on {day.date()} of animal {animal}.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")  
 
     df['is_anomaly'] = False
-    df.loc[filtered_events, 'is_anomaly'] = True
+    df.loc[df['date'].isin(event_days), 'is_anomaly'] = True
 
     return df
 
 # example usage
-print(mean_based_anomaly_estimation('1009', 3.0))
-print(mean_based_anomaly_estimation('1224', 2.5))
-print(mean_based_anomaly_estimation('1013', 3.5))
-print(mean_based_anomaly_estimation('1215', 3.0))
-print(mean_based_anomaly_estimation('1356', 3.0))
-print(mean_based_anomaly_estimation('1256', 3.0))
+print(mean_based_anomaly_estimation('1009'))
+print(mean_based_anomaly_estimation('1224'))
+print(mean_based_anomaly_estimation('1013'))
+print(mean_based_anomaly_estimation('1215'))
+print(mean_based_anomaly_estimation('1356'))
+print(mean_based_anomaly_estimation('1256'))

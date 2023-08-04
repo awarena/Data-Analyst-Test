@@ -65,5 +65,10 @@ def mean_based_anomaly_estimation(animal, threshold_factor=3.0, min_event_gap=20
 
     return df
 
-print(mean_based_anomaly_estimation('1009'), 3)
+# example usage
+print(mean_based_anomaly_estimation('1009', 3.0))
 print(mean_based_anomaly_estimation('1224', 2.5))
+print(mean_based_anomaly_estimation('1013', 3.5))
+print(mean_based_anomaly_estimation('1215', 3.0))
+print(mean_based_anomaly_estimation('1356', 3.0))
+print(mean_based_anomaly_estimation('1256', 3.0))

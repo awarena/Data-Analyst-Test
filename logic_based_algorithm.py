@@ -38,12 +38,11 @@ def mean_based_anomaly_estimation(animal, threshold_factor=3.0, min_event_gap=20
     df.columns = ["date", "value"]
     df = df.sort_values(by='date')
     df['date'] = pd.to_datetime(df['date'])
-
     df['date'] = df['date'].dt.normalize() # truncate the time part of the object
     overall_mean_value = df['value'].mean() # overall mean
-    df['mean_value'] = df.groupby('date')['value'].transform('mean') # add another column for mean value of each day
     df['is_anomaly'] = df['value'] > (threshold_factor * overall_mean_value) # add another column to indicate if the day is anomaly or not
-    
+    # 
+
     if not (True in df['is_anomaly'].unique()):
         print(f"Animal {animal} does not have any event.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")
         return df
@@ -66,4 +65,5 @@ def mean_based_anomaly_estimation(animal, threshold_factor=3.0, min_event_gap=20
 
     return df
 
-print(mean_based_anomaly_estimation('1356', 4.0))
+print(mean_based_anomaly_estimation('1009'), 3)
+print(mean_based_anomaly_estimation('1224', 2.5))

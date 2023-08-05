@@ -61,6 +61,7 @@ def mean_based_anomaly_estimation(animal, threshold_factor=2.5, min_outlier=10):
         print(f"An event might happen on {day.date()} of animal {animal}.\nPlease note this is only for reference. A manual validation is needed for every projection the algorithm makes.\n")  
 
     df['is_anomaly'] = False
+
     df.loc[df['date'].isin(event_days), 'is_anomaly'] = True
 
     return df
@@ -72,3 +73,7 @@ print(mean_based_anomaly_estimation('1013'))
 print(mean_based_anomaly_estimation('1215'))
 print(mean_based_anomaly_estimation('1356'))
 print(mean_based_anomaly_estimation('1256'))
+print(mean_based_anomaly_estimation('1237'))
+print(mean_based_anomaly_estimation('1261'))
+print(mean_based_anomaly_estimation('1328'))
+print(mean_based_anomaly_estimation('1255'))
